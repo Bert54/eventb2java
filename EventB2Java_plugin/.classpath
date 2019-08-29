@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/annotations-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/answerparser-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/aopalliance-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bparser-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cliparser-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/clj-ds-0.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-cli-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/de.prob2.kernel-3.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/eventbalg-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/groovy-all-2.4.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gson-1.7.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-19.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guice-4.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hamcrest-core-1.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javax.inject-1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jna-3.4.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsr305-1.3.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/logback-classic-1.1.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/logback-core-1.1.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ltlparser-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parserbase-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/prologlib-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ptolemy-jfmi-1.1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/rodin-eventb-ast-3.2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.21.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/spock-core-1.0-groovy-2.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/theorymapping-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tla2bAST-1.0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tlatools-1.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/translator-2.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unicode-2.8.0.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

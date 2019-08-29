@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="org.eventb.ui.MachineFile"
+            objectClass="org.eventb.core.IMachineRoot">
+            <menu
+               label="Java CodeGen"
+               id="eventb2jmlMenu">
+            <separator
+                  name="eventb2jmlGroup">
+            </separator>
+         </menu>
+         <action
+               class="eventb2javajml_plugin.machine.EB2JavaJml"
+               enablesFor="1"
+               id="eventb2jml_plugin.machine.EB2Java_nonthreaded"
+               label="Translate to sequential Java"
+               menubarPath="eventb2jmlMenu/eventb2jmlGroup"
+               tooltip="It ranslates the machine into Java code"/>
+          <action
+               class="eventb2javajml_plugin.machine.EB2JavaJml"
+               enablesFor="1"
+               id="eventb2jml_plugin.machine.EB2Java_threaded"
+               label="Translate to multi-threaded Java"
+               menubarPath="eventb2jmlMenu/eventb2jmlGroup"
+               tooltip="It ranslates the machine into Java code"/>
+      </objectContribution>
+      
+      </extension>
+</plugin>

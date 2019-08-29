@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>EventB2Java_plugin</name>
+	<comment></comment>
+	<projects/>
+	<natures>
+		<nature>org.eclipse.pde.PluginNature</nature>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.deved.antlride.core.nature</nature>
+	</natures>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.dltk.core.scriptbuilder</name>
+			<arguments/>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments/>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.pde.ManifestBuilder</name>
+			<arguments/>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.pde.SchemaBuilder</name>
+			<arguments/>
+		</buildCommand>
+	</buildSpec>
+	<linkedResources/>
+</projectDescription>

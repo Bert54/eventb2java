@@ -1,0 +1,635 @@
+//TODO: I think I am not longer using class field 'd'
+package eventb2javajml_plugin.machine;
+
+public class JmlType {
+
+	static final String boolT = "Boolean";
+	static final String intT = "Integer";
+	static final String setT = "BSet";
+	static final String relT = "BRel";
+	static final String pairT = "Pair";
+	static final String noT = "noT";
+
+	static final String NATIVE = "NATIVE";
+	static final String SET = "SET";
+
+
+	private String name;
+	//private String internalType; // could be either boolT or intT or setT or relT or pairT
+	public String internalType; // could be either boolT or intT or setT or relT or pairT
+
+	//variables used in case the var is a BRelation
+	private JmlType domain;
+	private JmlType range;
+
+	//variables used in case the var is a BSet
+	private JmlType setType;
+
+	//variables used in case the var is a Pair
+	private JmlType left_side;
+	private JmlType right_side;
+
+	public boolean d;
+
+	JmlType(JmlType c){
+		if (c != null){
+			name = c.name;
+			internalType = c.internalType; 
+
+			domain = c.domain;
+			range = c.range;
+
+			setType = c.setType;
+
+			left_side = c.left_side;
+			right_side = c.right_side;
+
+			d = c.d;
+		}
+	}
+
+
+	JmlType(){
+		d = true;
+	}
+
+	JmlType(String Name, String JmlType){
+		d = false;
+		name = Name;
+		internalType = JmlType;
+	}
+
+	JmlType(String JmlType){
+		d = false;
+		name = "";
+		internalType = JmlType;
+	}
+
+	public String getInternalType(){
+		return internalType;
+	}
+
+	public void setValues(String n, String t){
+		d = false;
+		name = n;
+		internalType = t;
+	}
+
+	public JmlType getSetType(){
+		return setType;
+	}
+
+	public String getName(){
+		return name;
+	}
+
+	public String getJmlType(){
+		if (internalType.equals(boolT) ||
+				internalType.equals(intT)){
+			return internalType;
+		}
+		return getType2(this,"");
+	}
+
+	private String getType2(JmlType t, String ty){
+		if (t.internalType.equals(relT)){
+			ty += "BRelation<";
+			if (t.getDomainType() == null){
+				ty += "ERROR";
+			}else{
+				ty = getType2(t.getDomainType(),ty);
+			}
+			ty += ",";
+			if (t.getRangeType() == null){
+				ty += "ERROR";
+			}else{
+				ty = getType2(t.getRangeType(),ty);
+			}
+			ty += ">";
+		}else if (t.internalType.equals(setT)){
+			ty += "BSet<";
+			if (t.getSetType() == null){
+				ty += "ERROR";
+			}else{
+				ty = getType2(t.getSetType(),ty);
+			}
+			ty += ">";
+		}else if(t.internalType.equals(pairT)){
+			ty += "Pair<";
+			if (t.prj1() == null){
+				ty += "ERROR";
+			}else{
+				ty = getType2(t.prj1(),ty);
+			}
+			ty += ",";
+			if (t.prj2() == null){
+				ty += "ERROR";
+			}else{
+				ty = getType2(t.prj2(),ty);
+			}
+			ty += ">";
+		}else
+			ty += t.internalType;
+		return ty;
+	}
+
+	//it finds the first BSet<null> and changes it to BRelation<null,null>
+	//the caller of this method already know that the in BSet<null>, null is 
+	//going to be replaced by Pair (we are translating BSet<Pair> as BRelation<>
+	public boolean updateSetPairs(){
+		if (this.internalType.equals(setT)){ //checks if this is the set
+			if (this.setType == null){ //checks if this is the type I have to change
+				this.internalType = relT;
+				this.domain = null;
+				this.range = null;
+				this.setType = null;
+				this.left_side = null;
+				this.right_side = null;
+				return true;
+			}else{
+				return this.setType.updateSetPairs();
+			}
+		}else{
+			if (this.internalType.equals(relT)){ //checks if this is a rel
+				//checks if the domain has the set to be changed
+				if (this.domain == null){
+					return false;
+				}
+				if (!this.domain.updateSetPairs()){
+					//checks if the range has the set to be changed
+					if (this.range == null){
+						return false;
+					}
+					return this.range.updateSetPairs();
+				}else{
+					return true;
+				}
+			}else{
+				if (this.internalType.equals(pairT)){ //checks if this is a pair
+					//checks if the left part has the set to be changed
+					if (this.left_side == null){
+						return false;
+					}
+					if (!this.left_side.updateSetPairs()){
+						//checks if the right has the set to be changed
+						if (this.right_side == null){
+							return false;
+						}
+						return this.right_side.updateSetPairs();
+					}else{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+
+	public boolean updatePair(JmlType pair){
+		if (this.internalType.equals(setT)){ //checks if this is the set
+			if (this.setType == null){ //checks if this is the type I have to change
+				this.internalType = relT;
+				this.domain = new JmlType(pair.left_side);
+				this.range = new JmlType(pair.right_side);
+				this.setType = null;
+				this.left_side = null;
+				this.right_side = null;
+				return true;
+			}else{
+				return this.setType.updatePair(pair);
+			}
+		}else{
+			if (this.internalType.equals(relT)){ //checks if this is a rel
+				//checks if the domain has the set to be changed
+				if (this.domain == null){
+					this.domain = new JmlType(pair);
+					this.setType = null;
+					this.left_side = null;
+					this.right_side = null;
+					return true;
+				}
+				if (!this.domain.updatePair(pair)){
+					//checks if the range has the set to be changed
+					if (this.range == null){
+						this.range = new JmlType(pair);
+						this.setType = null;
+						this.left_side = null;
+						this.right_side = null;
+						return true;
+					}
+					return this.range.updatePair(pair);
+				}else{
+					return true;
+				}
+			}else{
+				if (this.internalType.equals(pairT)){ //checks if this is a pair
+					//checks if the left part has the set to be changed
+					if (this.left_side == null){
+						this.domain = null;
+						this.range = null;
+						this.setType = null;
+						this.left_side = new JmlType(pair);
+						this.right_side = null;
+						return true;
+					}
+					if (!this.left_side.updatePair(pair)){
+						//checks if the right has the set to be changed
+						if (this.right_side == null){
+							this.domain = null;
+							this.range = null;
+							this.setType = null;
+							this.left_side = null;
+							this.right_side = new JmlType(pair);
+							return true;
+						}
+						return this.right_side.updatePair(pair);
+					}else{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	public boolean update(JmlType t){
+		if (this.internalType.equals(noT)){
+			this.name = t.name;
+			this.internalType = t.internalType;
+			this.domain = t.domain;
+			this.range = t.range;
+			this.setType = t.setType;
+			this.left_side = t.left_side;
+			this.right_side = t.right_side;
+			this.d = t.d;
+			return true;
+		}
+
+		if (this.internalType.equals(intT) || 
+				this.internalType.equals(boolT)){
+			return false;
+		}
+
+		if (this.internalType.equals(setT)){
+			if (this.setType == null){
+				//if t is a pair, it is treated as a Relation
+				if (t.internalType.equals (pairT)) {
+					this.internalType = relT;
+					this.domain = t.prj1();
+					this.range = t.prj2();
+				}else {
+					this.setType = new JmlType(t);
+				}
+				return true;
+			}else{
+				return this.setType.update(t);
+			}
+		} else if (this.internalType.equals(pairT)){
+			if (this.left_side == null){
+				this.left_side = new JmlType(t);
+				return true;
+			}
+			if (this.left_side.update(t)){
+				return true;
+			}
+
+			if (this.right_side == null){
+				this.right_side = new JmlType(t);
+				return true;
+			}
+			return this.right_side.update(t);
+		} else if (this.internalType.equals(relT)){
+			if (this.domain == null){
+				this.domain = new JmlType(t);
+				return true;
+			}
+			if (this.domain.update(t)){
+				return true;
+			}
+
+			if (this.range == null){
+				this.range = new JmlType(t);
+				return true;
+			}
+			return this.range.update(t);
+		}
+		return false;
+	}
+
+	public boolean update12(String t){
+		d = false;
+		if (internalType.equals(relT)){
+			return updateRel(t);
+		}
+		if (internalType.equals(setT)){
+			return updateSet(t);
+		}
+
+		if (internalType.equals(pairT)){
+			return updatePair(t);
+		}
+		return false;
+	}
+
+	private boolean updatePair(String t){
+		if (this.left_side == null){
+			this.left_side = new JmlType("",t);
+			return true;
+		}else{
+			//could be a Set, Rel or another Pair
+			if (this.left_side.getInternalType().equals(setT)){
+				if (this.left_side.updateSet(t)){
+					return true;
+				}
+			}else if (this.left_side.getInternalType().equals(relT)){
+				if (this.left_side.updateRel(t)){
+					return true;
+				}
+			} if (this.left_side.getInternalType().equals(pairT)){
+				if (this.left_side.updatePair(t)){
+					return true;
+				}
+			}
+		}
+
+		if (this.right_side == null){
+			this.right_side = new JmlType("",t);
+			return true;
+		}else{
+			//could be a Set, Rel or another Pair
+			if (this.right_side.getInternalType().equals(setT)){
+				return this.right_side.updateSet(t);
+			}else if (this.right_side.getInternalType().equals(relT)){
+				return this.right_side.updateRel(t);
+			} if (this.right_side.getInternalType().equals(pairT)){
+				return this.right_side.updatePair(t);
+			}
+		}
+		return false;
+	}
+
+	//uses for creating/updating of BSet
+	private boolean updateSet(String t){
+		if (setType == null){
+			setType = new JmlType("", t);
+			return true;
+		}else{
+			if (setType.getInternalType().equals(setT)){
+				return setType.updateSet(t);
+			}else if (setType.getInternalType().equals(relT)){
+				return setType.updateRel(t);
+			} if (setType.getInternalType().equals(pairT)){
+				return setType.updatePair(t);
+			}
+		}
+		return false;
+	}
+
+	//uses for creating/updating of BRelation
+	private boolean updateRel(String t){
+		if (domain == null){
+			//it is necessary to create a internalType
+			domain = new JmlType("",t);
+			return true;
+		}
+
+		if (domain.internalType.equals(relT)){ //the domain is a relation
+			if (domain.updateRel(t)){
+				return true;
+			}
+		}else{
+			if (domain.internalType.equals(setT)){ //the domain is a set
+				if (domain.updateSet(t)){
+					return true;
+				}
+			}else{
+				if (domain.internalType.equals(pairT)){ //the domain is a pair
+					if (domain.updatePair(t)){
+						return true;
+					}
+				}
+			}
+		}
+		//already done with the domain.. try with the range
+		if (range == null){
+			//it is necessary to create a internalType
+			range = new JmlType("",t);
+			return true;
+		}
+
+		if (range.internalType.equals(relT)){//the domain is a relation
+			if (range.updateRel(t)){
+				return true;
+			}
+		}else{
+			if (range.internalType.equals(setT)){ //the domain is a set
+				if (range.updateSet(t)){
+					return true;
+				}
+			}else{
+				if (range.internalType.equals(pairT)){ //the domain is a pair
+					if (range.updatePair(t)){
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	//methods for pairs
+	public JmlType prj1(){
+		return left_side; 
+	}
+
+	public JmlType prj2(){
+		return right_side; 
+	}
+
+
+	//methods for BRelations
+	public JmlType getDomainType(){
+		return domain;
+	}
+
+	public JmlType getRangeType(){
+		return range;
+	}
+
+	public String getTypeInvariant(){
+		if (internalType.equals(boolT))
+			return "BOOL.instance";
+		if (internalType.equals(intT)){
+			return "INT.instance";
+		}
+		return getType3(this,"");
+	}
+
+	private String getType3(JmlType t, String ty){
+		if (t.internalType.equals(relT)){
+			ty += "BRelation.cross(";
+			if (t.getDomainType() == null){
+				ty += "ERROR";
+			}else{
+				ty = getType3(t.getDomainType(),ty);
+			}
+			ty += ",";
+			if (t.getRangeType() == null){
+				ty += "ERROR";
+			}else{
+				ty = getType3(t.getRangeType(),ty);
+			}
+			ty += ").pow()";
+		}else if (t.internalType.equals(setT)){
+			ty += "(";
+			if (t.getSetType() == null){
+				ty += "ERROR";
+			}else{
+				ty = getType3(t.getSetType(),ty);
+			}
+			ty += ").pow()";
+		}else 
+			if (t.internalType.equals(pairT)){
+				ty += "BRelation.cross(";
+				if (t.prj1() == null){
+					ty += "ERROR";
+				}else{
+					ty = getType3(t.prj1(),ty);
+				}
+				ty += ",";
+				if (t.prj2() == null){
+					ty += "ERROR";
+				}else{
+					ty = getType3(t.prj2(),ty);
+				}
+				ty += ")";
+			}else{
+				if (t.internalType.equals(boolT)){
+					ty += "BOOL.instance";
+				}else if(t.internalType.equals(intT)){
+					ty += "INT.instance";
+				}else
+					ty += t.internalType;
+			}
+		return ty;
+	}
+
+	//
+	public boolean changeRel(){
+		if (false){
+			if (this.internalType.equals(noT)){
+				return true;
+			}
+
+			if (this.internalType.equals(intT) || 
+					this.internalType.equals(boolT)){
+				return false;
+			}
+
+			if (this.internalType.equals(setT)){
+				if (this.setType == null){
+					return true;
+				}else{
+					return this.setType.changeRel();
+				}
+			} else if (this.internalType.equals(pairT)){
+				if (this.left_side == null){
+					return true;
+				}
+				if (this.left_side.changeRel()){
+					return true;
+				}
+
+				if (this.right_side == null){
+					return true;
+				}
+				return this.right_side.changeRel();
+			} else if (this.internalType.equals(relT)){
+				this.internalType = setT;
+				this.setType = new JmlType(pairT);
+				//this.internalType = pairT;
+				this.setType.left_side = new JmlType(this.domain);
+				this.setType.right_side = new JmlType(this.range);
+				if (this.domain == null){
+					return true;
+				}
+				if (this.domain.changeRel()){
+					return true;
+				}
+				if (this.range == null){
+					return true;
+				}
+				return this.range.changeRel();
+			}
+		}
+		return false;
+	}
+
+	public static boolean as = false;
+	public static void Print(String s){
+		if (as){
+			System.out.println(s);
+		}
+	}
+	
+	public String times(String s, int r){
+		String res = "";
+		
+		for (int i=0;i<=r;i++)
+			res += s;
+		return res;
+	}
+
+	public String p(String res, int tab){
+		String r = "";
+		
+		r = times("\t",tab+1) + "name: " + name + "\n";
+		r += times("\t",tab+1) + "internalType: " + internalType + "\n";
+		
+		r += times("\t",tab+1) + "domain: ";
+		if (domain == null)
+			r += "NULL\n";
+		else
+			r += domain.p(r, tab+1) + "\n";
+		
+		r += times("\t",tab+1) + "range: ";
+		if (range == null)
+			r += "NULL\n";
+		else
+			r += range.p(r, tab+1) + "\n";
+		
+		
+		r += times("\t",tab+1) + "set: ";
+		if (setType == null)
+			r += "NULL\n";
+		else
+			r += setType.p(r, tab+1) + "\n";
+		
+		r += times("\t",tab+1) + "left_side: ";
+		if (left_side == null)
+			r += "NULL\n";
+		else
+			r += left_side.p(r, tab+1) + "\n";
+
+		r += times("\t",tab+1) + "right_side: ";
+		if (right_side == null)
+			r += "NULL\n";
+		else
+			r += right_side.p(r, tab+1) + "\n";
+		
+		return r;
+	}
+	
+	@Override
+	public String toString(){
+		String res = p("",1);
+		return res;
+		
+	}
+	
+	public static void main(String[] args){
+	}
+
+}
