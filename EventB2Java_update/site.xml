@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/featureProject_1.0.0.201908061151.jar" id="featureProject" version="1.0.0.201908061151">
+      <category name="EventB2Java"/>
+   </feature>
+   <category-def name="EventB2Java" label="EventB2Java"/>
+</site>
